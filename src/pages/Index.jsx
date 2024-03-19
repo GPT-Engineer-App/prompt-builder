@@ -29,7 +29,7 @@ const Index = () => {
     name: "",
     title: "",
     company: "",
-    custom: "",
+    customVariables: [{ name: "Custom Variable", value: "" }],
   });
 
   const addComponent = (type) => {
@@ -55,14 +55,29 @@ const Index = () => {
     setUser({ ...user, [field]: value });
   };
 
+  const updateCustomVariable = (index, field, value) => {
+    const updatedCustomVariables = [...user.customVariables];
+    updatedCustomVariables[index][field] = value;
+    setUser({ ...user, customVariables: updatedCustomVariables });
+  };
+
+  const addCustomVariable = () => {
+    setUser({
+      ...user,
+      customVariables: [...user.customVariables, { name: "", value: "" }],
+    });
+  };
+
   const [generatedMessage, setGeneratedMessage] = useState("");
 
   const generateMessage = () => {
     const message = components
       .map(({ content }) => {
-        let personalizedContent = content.replace("{{name}}", persona.name).replace("{{company}}", persona.company).replace("{{highlightedEducation}}", persona.highlightedEducation).replace("{{jobTitle}}", persona.jobTitle).replace("{{industry}}", persona.industry);
+        let personalizedContent = content.replace("{{name}}", persona.name).replace("{{company}}", persona.company).replace("{{highlightedEducation}}", persona.highlightedEducation).replace("{{jobTitle}}", persona.jobTitle).replace("{{industry}}", persona.industry).replace("{{userName}}", user.name).replace("{{userTitle}}", user.title).replace("{{userCompany}}", user.company);
 
-        personalizedContent = personalizedContent.replace("{{userName}}", user.name).replace("{{userTitle}}", user.title).replace("{{userCompany}}", user.company).replace("{{userCustom}}", user.custom);
+        user.customVariables.forEach(({ name, value }) => {
+          personalizedContent = personalizedContent.replace(`{{${name}}}`, value);
+        });
 
         return personalizedContent;
       })
@@ -101,7 +116,7 @@ const Index = () => {
             <Text fontWeight="bold" mb={2}>
               {type === COMPONENT_TYPES.TEXT ? "Text Block" : "Personalized Block"}
             </Text>
-            <Textarea value={content} onChange={(e) => updateComponent(index, e.target.value)} placeholder="Enter your text here. Use {{jobTitle}}, {{company}}, {{name}}, {{industry}} as placeholders." />
+            <Textarea value={content} onChange={(e) => updateComponent(index, e.target.value)} placeholder="Enter your text here. Use {{jobTitle}}, {{company}}, {{name}}, {{industry}}, {{userName}}, {{userTitle}}, {{userCompany}}, and custom variables as placeholders." />
             <Button size="sm" colorScheme="red" leftIcon={<FaTrash />} mt={2} onClick={() => deleteComponent(index)}>
               Delete
             </Button>
@@ -132,10 +147,15 @@ const Index = () => {
           <Text mb={1}>Company</Text>
           <Input value={user.company} onChange={(e) => updateUser("company", e.target.value)} placeholder="Enter User Company" />
         </Box>
-        <Box>
-          <Text mb={1}>Custom Variable</Text>
-          <Input value={user.custom} onChange={(e) => updateUser("custom", e.target.value)} placeholder="Enter Custom Variable" />
-        </Box>
+        {user.customVariables.map(({ name, value }, index) => (
+          <Box key={index}>
+            <Input value={name} onChange={(e) => updateCustomVariable(index, "name", e.target.value)} placeholder="Enter Custom Variable Name" />
+            <Input mt={2} value={value} onChange={(e) => updateCustomVariable(index, "value", e.target.value)} placeholder="Enter Custom Variable Value" />
+          </Box>
+        ))}
+        <Button onClick={addCustomVariable} mt={4}>
+          Add Custom Variable
+        </Button>
       </VStack>
 
       <Divider my={8} />
