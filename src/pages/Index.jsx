@@ -266,7 +266,7 @@ const SavedPrompts = ({ prompts, onSelectPrompt }) => {
     setError("");
 
     try {
-      const response = await fetch("https://api.openai.com/v1/completions", {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -274,7 +274,10 @@ const SavedPrompts = ({ prompts, onSelectPrompt }) => {
         },
         body: JSON.stringify({
           model: "gpt-3.5-turbo",
-          prompt: selectedPrompt + "\n\n" + userMessage,
+          messages: [
+            { role: "system", content: selectedPrompt },
+            { role: "user", content: userMessage },
+          ],
           max_tokens: 100,
           n: 1,
           temperature: 0.7,
@@ -286,7 +289,7 @@ const SavedPrompts = ({ prompts, onSelectPrompt }) => {
         setError(`API request failed with status ${response.status}: ${errorData.error.message}`);
       } else {
         const data = await response.json();
-        setApiResponse(data.choices[0].text.trim());
+        setApiResponse(data.choices[0].message.content.trim());
       }
     } catch (error) {
       setError(error.message);
