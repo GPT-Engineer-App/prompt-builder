@@ -80,31 +80,54 @@ const Index = () => {
   };
 
   const [generatedMessage, setGeneratedMessage] = useState("");
+  const [savedPrompts, setSavedPrompts] = useState([]);
+  const [selectedPrompt, setSelectedPrompt] = useState("");
 
-  const generateMessage = () => {
-    const message = components
-      .map(({ content }) => {
-        let personalizedContent = content;
+  const generateMessage = async () => {
+    const message =
+      selectedPrompt ||
+      components
+        .map(({ content }) => {
+          let personalizedContent = content;
 
-        Object.entries(persona).forEach(([key, value]) => {
-          personalizedContent = personalizedContent.replace(new RegExp(`{{${key}}}`, "g"), value);
-        });
+          Object.entries(persona).forEach(([key, value]) => {
+            personalizedContent = personalizedContent.replace(new RegExp(`{{${key}}}`, "g"), value);
+          });
 
-        Object.entries(user).forEach(([key, value]) => {
-          if (key !== "customVariables") {
-            personalizedContent = personalizedContent.replace(new RegExp(`{{user${key.charAt(0).toUpperCase() + key.slice(1)}}}`, "g"), value);
-          }
-        });
+          Object.entries(user).forEach(([key, value]) => {
+            if (key !== "customVariables") {
+              personalizedContent = personalizedContent.replace(new RegExp(`{{user${key.charAt(0).toUpperCase() + key.slice(1)}}}`, "g"), value);
+            }
+          });
 
-        user.customVariables.forEach(({ name, value }) => {
-          personalizedContent = personalizedContent.replace(`{{${name}}}`, value);
-        });
+          user.customVariables.forEach(({ name, value }) => {
+            personalizedContent = personalizedContent.replace(`{{${name}}}`, value);
+          });
 
-        return personalizedContent;
-      })
-      .join("\n\n");
+          return personalizedContent;
+        })
+        .join("\n\n");
 
     setGeneratedMessage(message);
+
+    const response = await fetch("https://api.openai.com/v1/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "text-davinci-002",
+        prompt: message,
+        max_tokens: 100,
+        n: 1,
+        stop: null,
+        temperature: 0.7,
+      }),
+    });
+
+    const data = await response.json();
+    console.log(data.choices[0].text);
   };
 
   useEffect(() => {
@@ -208,6 +231,9 @@ const Index = () => {
       <Button colorScheme="blue" size="lg" mt={8} onClick={generateMessage}>
         Generate Message
       </Button>
+      <Button colorScheme="green" size="lg" mt={2} onClick={() => setSavedPrompts([...savedPrompts, generatedMessage])}>
+        Save Prompt
+      </Button>
 
       {generatedMessage && (
         <Box mt={8} p={4} borderWidth={1} borderRadius="md">
@@ -217,6 +243,26 @@ const Index = () => {
           <Text whiteSpace="pre-wrap">{generatedMessage}</Text>
         </Box>
       )}
+
+      <SavedPrompts prompts={savedPrompts} onSelectPrompt={setSelectedPrompt} />
+    </Box>
+  );
+};
+
+const SavedPrompts = ({ prompts, onSelectPrompt }) => {
+  return (
+    <Box mt={8}>
+      <Heading size="md" mb={4}>
+        Saved Prompts:
+      </Heading>
+      {prompts.map((prompt, index) => (
+        <Box key={index} mb={2}>
+          <Text>{prompt}</Text>
+          <Button size="sm" colorScheme="blue" mt={2} onClick={() => onSelectPrompt(prompt)}>
+            Use Prompt
+          </Button>
+        </Box>
+      ))}
     </Box>
   );
 };
