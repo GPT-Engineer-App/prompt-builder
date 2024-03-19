@@ -274,10 +274,7 @@ const SavedPrompts = ({ prompts, onSelectPrompt }) => {
         },
         body: JSON.stringify({
           model: "gpt-3.5-turbo",
-          messages: [
-            { role: "system", content: selectedPrompt },
-            { role: "user", content: userMessage },
-          ],
+          prompt: selectedPrompt + "\n\n" + userMessage,
           max_tokens: 100,
           n: 1,
           temperature: 0.7,
@@ -289,7 +286,7 @@ const SavedPrompts = ({ prompts, onSelectPrompt }) => {
         setError(`API request failed with status ${response.status}: ${errorData.error.message}`);
       } else {
         const data = await response.json();
-        setApiResponse(data.choices[0].message.content);
+        setApiResponse(data.choices[0].text.trim());
       }
     } catch (error) {
       setError(error.message);
