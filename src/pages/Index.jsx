@@ -231,7 +231,7 @@ const Index = () => {
       <Button colorScheme="blue" size="lg" mt={8} onClick={generateMessage}>
         Generate Message
       </Button>
-      <Button colorScheme="green" size="lg" mt={2} onClick={() => setSavedPrompts([...savedPrompts, generatedMessage])}>
+      <Button colorScheme="green" size="lg" mt={2} onClick={() => setSavedPrompts([...savedPrompts, ...generatedMessage.split("\n")])}>
         Save Prompt
       </Button>
 
@@ -354,6 +354,9 @@ const SavedPrompts = ({ prompts, onSelectPrompt }) => {
             API Response:
           </Heading>
           <Text>{apiResponse}</Text>
+          <Button size="sm" colorScheme="blue" mt={2} onClick={() => navigator.clipboard.writeText(apiResponse)}>
+            Copy to Clipboard
+          </Button>
         </Box>
       )}
     </Box>
