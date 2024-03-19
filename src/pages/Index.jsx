@@ -8,18 +8,20 @@ const COMPONENT_TYPES = {
 };
 
 const PersonalizedOptions = {
-  JOB_TITLE: "Job Title",
-  COMPANY: "Company",
   NAME: "Name",
+  COMPANY: "Current Company",
+  HIGHLIGHTED_EDUCATION: "Highlighted Education",
+  JOB_TITLE: "Job Title",
   INDUSTRY: "Industry",
 };
 
 const Index = () => {
   const [components, setComponents] = useState([]);
   const [persona, setPersona] = useState({
-    jobTitle: "",
-    company: "",
     name: "",
+    company: "",
+    highlightedEducation: "",
+    jobTitle: "",
     industry: "",
   });
 
@@ -45,7 +47,7 @@ const Index = () => {
   const generateMessage = () => {
     const message = components
       .map(({ content }) => {
-        return content.replace("{{jobTitle}}", persona.jobTitle).replace("{{company}}", persona.company).replace("{{name}}", persona.name).replace("{{industry}}", persona.industry);
+        return content.replace("{{name}}", persona.name).replace("{{company}}", persona.company).replace("{{highlightedEducation}}", persona.highlightedEducation).replace("{{jobTitle}}", persona.jobTitle).replace("{{industry}}", persona.industry);
       })
       .join("\n\n");
 
@@ -80,7 +82,7 @@ const Index = () => {
       <Divider my={8} />
 
       <VStack spacing={4} align="stretch">
-        <Heading size="md">Persona Details</Heading>
+        <Heading size="md">Prospect Details</Heading>
         {Object.entries(PersonalizedOptions).map(([key, label]) => (
           <Box key={key}>
             <Text mb={1}>{label}</Text>
