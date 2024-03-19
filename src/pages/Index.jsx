@@ -5,7 +5,6 @@ import { FaPlus, FaTrash } from "react-icons/fa";
 const COMPONENT_TYPES = {
   TEXT: "Text",
   PERSONALIZED: "Personalized",
-  CUSTOM: "Custom",
 };
 
 const PersonalizedOptions = {
@@ -18,8 +17,6 @@ const PersonalizedOptions = {
 
 const Index = () => {
   const [components, setComponents] = useState([]);
-  const [customBlocks, setCustomBlocks] = useState([]);
-  const [newCustomBlock, setNewCustomBlock] = useState({ name: "", content: "" });
   const [persona, setPersona] = useState({
     name: "",
     company: "",
@@ -75,11 +72,7 @@ const Index = () => {
 
   const generateMessage = () => {
     const message = components
-      .map(({ type, content }) => {
-        if (type.startsWith(COMPONENT_TYPES.CUSTOM)) {
-          const index = parseInt(type.split("_")[1], 10);
-          return customBlocks[index].content;
-        }
+      .map(({ content }) => {
         let personalizedContent = content.replace("{{name}}", persona.name).replace("{{company}}", persona.company).replace("{{highlightedEducation}}", persona.highlightedEducation).replace("{{jobTitle}}", persona.jobTitle).replace("{{industry}}", persona.industry).replace("{{userName}}", user.name).replace("{{userTitle}}", user.title).replace("{{userCompany}}", user.company);
 
         user.customVariables.forEach(({ name, value }) => {
@@ -113,27 +106,9 @@ const Index = () => {
     setComponents(newComponents);
   };
 
-  const saveCustomBlock = () => {
-    setCustomBlocks([...customBlocks, newCustomBlock]);
-    setNewCustomBlock({ name: "", content: "" });
-  };
-
   return (
     <Box maxW="800px" mx="auto" p={8}>
       <Heading mb={8}>LinkedIn Cold Outreach Message Builder</Heading>
-
-      <VStack spacing={4} align="stretch" mb={8}>
-        <Heading size="md">Custom Blocks</Heading>
-        <Box>
-          <Text mb={1}>Name</Text>
-          <Input value={newCustomBlock.name} onChange={(e) => setNewCustomBlock({ ...newCustomBlock, name: e.target.value })} placeholder="Enter Custom Block Name" />
-        </Box>
-        <Box>
-          <Text mb={1}>Content</Text>
-          <Textarea value={newCustomBlock.content} onChange={(e) => setNewCustomBlock({ ...newCustomBlock, content: e.target.value })} placeholder="Enter Custom Block Content" />
-        </Box>
-        <Button onClick={saveCustomBlock}>Save Custom Block</Button>
-      </VStack>
 
       <VStack spacing={4} align="stretch">
         {components.map(({ type, content }, index) => (
@@ -153,11 +128,6 @@ const Index = () => {
         <Select placeholder="Add a component" onChange={(e) => addComponent(e.target.value)}>
           <option value={COMPONENT_TYPES.TEXT}>Text Block</option>
           <option value={COMPONENT_TYPES.PERSONALIZED}>Personalized Block</option>
-          {customBlocks.map(({ name }, index) => (
-            <option key={index} value={`${COMPONENT_TYPES.CUSTOM}_${index}`}>
-              {name}
-            </option>
-          ))}
         </Select>
       </Box>
 
