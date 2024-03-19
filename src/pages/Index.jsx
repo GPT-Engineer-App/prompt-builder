@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Box, VStack, Text, Textarea, Button, Select, Input, Heading, Divider } from "@chakra-ui/react";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
@@ -44,6 +44,8 @@ const Index = () => {
     setPersona({ ...persona, [field]: value });
   };
 
+  const [generatedMessage, setGeneratedMessage] = useState("");
+
   const generateMessage = () => {
     const message = components
       .map(({ content }) => {
@@ -51,8 +53,12 @@ const Index = () => {
       })
       .join("\n\n");
 
-    alert(`Generated Message:\n\n${message}`);
+    setGeneratedMessage(message);
   };
+
+  useEffect(() => {
+    setGeneratedMessage("");
+  }, [components, persona]);
 
   return (
     <Box maxW="800px" mx="auto" p={8}>
@@ -94,6 +100,15 @@ const Index = () => {
       <Button colorScheme="blue" size="lg" mt={8} onClick={generateMessage}>
         Generate Message
       </Button>
+
+      {generatedMessage && (
+        <Box mt={8} p={4} borderWidth={1} borderRadius="md">
+          <Heading size="md" mb={4}>
+            Generated Message:
+          </Heading>
+          <Text whiteSpace="pre-wrap">{generatedMessage}</Text>
+        </Box>
+      )}
     </Box>
   );
 };
