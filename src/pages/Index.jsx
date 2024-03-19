@@ -17,7 +17,6 @@ const PersonalizedOptions = {
 
 const Index = () => {
   const [components, setComponents] = useState([]);
-  const [savedComponents, setSavedComponents] = useState([]);
   const [persona, setPersona] = useState({
     name: "",
     company: "",
@@ -33,13 +32,8 @@ const Index = () => {
     customVariables: [{ name: "Custom Variable", value: "" }],
   });
 
-  const addComponent = (type, savedContent = "") => {
-    if (type.startsWith("saved:")) {
-      const savedComponent = savedComponents.find((c) => c.name === type.slice(6));
-      setComponents([...components, { type: savedComponent.type, content: savedComponent.content, name: savedComponent.name }]);
-    } else {
-      setComponents([...components, { type, content: savedContent, name: `Component ${components.length + 1}` }]);
-    }
+  const addComponent = (type) => {
+    setComponents([...components, { type, content: "" }]);
   };
 
   const updateComponent = (index, content) => {
@@ -127,16 +121,12 @@ const Index = () => {
       <Heading mb={8}>LinkedIn Cold Outreach Message Builder</Heading>
 
       <VStack spacing={4} align="stretch">
-        {components.map(({ type, content, name }, index) => (
+        {components.map(({ type, content }, index) => (
           <Box key={index} p={4} borderWidth={1} borderRadius="md" draggable="true" onDragStart={(e) => handleDragStart(e, index)} onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, index)}>
-            <Input value={name} onChange={(e) => updateComponentName(index, e.target.value)} placeholder="Component Name" />
-            <Text fontWeight="bold" mt={2} mb={2}>
+            <Text fontWeight="bold" mb={2}>
               {type === COMPONENT_TYPES.TEXT ? "Text Block" : "Personalized Block"}
             </Text>
             <Textarea value={content} onChange={(e) => updateComponent(index, e.target.value)} placeholder="Enter your text here. Use {{jobTitle}}, {{company}}, {{name}}, {{industry}}, {{userName}}, {{userTitle}}, {{userCompany}}, and custom variables as placeholders." />
-            <Button size="sm" colorScheme="blue" mt={2} onClick={() => saveComponent(index)}>
-              Save
-            </Button>
             <Button size="sm" colorScheme="red" leftIcon={<FaTrash />} mt={2} onClick={() => deleteComponent(index)}>
               Delete
             </Button>
@@ -148,11 +138,6 @@ const Index = () => {
         <Select placeholder="Add a component" onChange={(e) => addComponent(e.target.value)}>
           <option value={COMPONENT_TYPES.TEXT}>Text Block</option>
           <option value={COMPONENT_TYPES.PERSONALIZED}>Personalized Block</option>
-          {savedComponents.map((component) => (
-            <option key={component.name} value={`saved:${component.name}`}>
-              {component.name} (Saved)
-            </option>
-          ))}
         </Select>
       </Box>
 
