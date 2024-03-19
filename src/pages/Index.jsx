@@ -47,9 +47,9 @@ const Index = () => {
     [components, savedComponents],
   );
 
-  const updateComponent = (index, content) => {
+  const updateComponent = (index, field, value) => {
     const updatedComponents = [...components];
-    updatedComponents[index].content = content;
+    updatedComponents[index][field] = value;
     setComponents(updatedComponents);
   };
 
@@ -139,11 +139,11 @@ const Index = () => {
       <VStack spacing={4} align="stretch">
         {components.map(({ type, content, name }, index) => (
           <Box key={index} p={4} borderWidth={1} borderRadius="md" draggable="true" onDragStart={(e) => handleDragStart(e, index)} onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, index)}>
-            <Input value={name} onChange={(e) => updateComponent(index, "name", e.target.value)} placeholder="Enter block name" mb={2} />
+            <Input value={name || ""} onChange={(e) => updateComponent(index, "name", e.target.value)} placeholder="Enter block name" mb={2} />
             <Text fontWeight="bold" mb={2}>
               {type === COMPONENT_TYPES.TEXT ? "Text Block" : "Personalized Block"}
             </Text>
-            <Textarea value={content} onChange={(e) => updateComponent(index, "content", e.target.value)} placeholder="Enter your text here. Use {{jobTitle}}, {{company}}, {{name}}, {{industry}}, {{userName}}, {{userTitle}}, {{userCompany}}, and custom variables as placeholders." />
+            <Textarea value={content || ""} onChange={(e) => updateComponent(index, "content", e.target.value)} placeholder="Enter your text here. Use {{jobTitle}}, {{company}}, {{name}}, {{industry}}, {{userName}}, {{userTitle}}, {{userCompany}}, and custom variables as placeholders." />
             <Button size="sm" colorScheme="blue" mt={2} onClick={() => saveComponent(index)}>
               Save
             </Button>
