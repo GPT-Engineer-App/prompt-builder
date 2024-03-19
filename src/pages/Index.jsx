@@ -264,6 +264,7 @@ const SavedPrompts = ({ prompts, onSelectPrompt }) => {
   const handleUsePrompt = async () => {
     setIsLoading(true);
     setError("");
+    setApiResponse("");
 
     try {
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -289,10 +290,14 @@ const SavedPrompts = ({ prompts, onSelectPrompt }) => {
         setError(`API request failed with status ${response.status}: ${errorData.error.message}`);
       } else {
         const data = await response.json();
-        setApiResponse(data.choices[0].message.content.trim());
+        if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+          setApiResponse(data.choices[0].message.content.trim());
+        } else {
+          setError("API response was not in the expected format.");
+        }
       }
     } catch (error) {
-      setError(error.message);
+      setError(`API request failed: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -314,6 +319,7 @@ const SavedPrompts = ({ prompts, onSelectPrompt }) => {
               setSelectedPrompt(prompt);
               onOpen();
             }}
+            isLoading={isLoading}
           >
             Use Prompt
           </Button>
