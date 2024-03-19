@@ -25,6 +25,13 @@ const Index = () => {
     industry: "",
   });
 
+  const [user, setUser] = useState({
+    name: "",
+    title: "",
+    company: "",
+    custom: "",
+  });
+
   const addComponent = (type) => {
     setComponents([...components, { type, content: "" }]);
   };
@@ -44,12 +51,20 @@ const Index = () => {
     setPersona({ ...persona, [field]: value });
   };
 
+  const updateUser = (field, value) => {
+    setUser({ ...user, [field]: value });
+  };
+
   const [generatedMessage, setGeneratedMessage] = useState("");
 
   const generateMessage = () => {
     const message = components
       .map(({ content }) => {
-        return content.replace("{{name}}", persona.name).replace("{{company}}", persona.company).replace("{{highlightedEducation}}", persona.highlightedEducation).replace("{{jobTitle}}", persona.jobTitle).replace("{{industry}}", persona.industry);
+        let personalizedContent = content.replace("{{name}}", persona.name).replace("{{company}}", persona.company).replace("{{highlightedEducation}}", persona.highlightedEducation).replace("{{jobTitle}}", persona.jobTitle).replace("{{industry}}", persona.industry);
+
+        personalizedContent = personalizedContent.replace("{{userName}}", user.name).replace("{{userTitle}}", user.title).replace("{{userCompany}}", user.company).replace("{{userCustom}}", user.custom);
+
+        return personalizedContent;
       })
       .join("\n\n");
 
@@ -100,6 +115,28 @@ const Index = () => {
           <option value={COMPONENT_TYPES.PERSONALIZED}>Personalized Block</option>
         </Select>
       </Box>
+
+      <Divider my={8} />
+
+      <VStack spacing={4} align="stretch">
+        <Heading size="md">User Details</Heading>
+        <Box>
+          <Text mb={1}>Name</Text>
+          <Input value={user.name} onChange={(e) => updateUser("name", e.target.value)} placeholder="Enter User Name" />
+        </Box>
+        <Box>
+          <Text mb={1}>Title</Text>
+          <Input value={user.title} onChange={(e) => updateUser("title", e.target.value)} placeholder="Enter User Title" />
+        </Box>
+        <Box>
+          <Text mb={1}>Company</Text>
+          <Input value={user.company} onChange={(e) => updateUser("company", e.target.value)} placeholder="Enter User Company" />
+        </Box>
+        <Box>
+          <Text mb={1}>Custom Variable</Text>
+          <Input value={user.custom} onChange={(e) => updateUser("custom", e.target.value)} placeholder="Enter Custom Variable" />
+        </Box>
+      </VStack>
 
       <Divider my={8} />
 
