@@ -43,15 +43,9 @@ const Index = () => {
   };
 
   const generateMessage = () => {
-    // TODO: Integrate with AI to generate personalized sentences
     const message = components
-      .map(({ type, content }) => {
-        if (type === COMPONENT_TYPES.TEXT) {
-          return content;
-        } else {
-          // Replace placeholders with persona data
-          return content.replace("{{jobTitle}}", persona.jobTitle).replace("{{company}}", persona.company).replace("{{name}}", persona.name).replace("{{industry}}", persona.industry);
-        }
+      .map(({ content }) => {
+        return content.replace("{{jobTitle}}", persona.jobTitle).replace("{{company}}", persona.company).replace("{{name}}", persona.name).replace("{{industry}}", persona.industry);
       })
       .join("\n\n");
 
@@ -68,7 +62,7 @@ const Index = () => {
             <Text fontWeight="bold" mb={2}>
               {type === COMPONENT_TYPES.TEXT ? "Text Block" : "Personalized Block"}
             </Text>
-            <Textarea value={content} onChange={(e) => updateComponent(index, e.target.value)} placeholder={type === COMPONENT_TYPES.TEXT ? "Enter your text here..." : "Enter your personalized message with {{placeholders}}..."} />
+            <Textarea value={content} onChange={(e) => updateComponent(index, e.target.value)} placeholder="Enter your text here. Use {{jobTitle}}, {{company}}, {{name}}, {{industry}} as placeholders." />
             <Button size="sm" colorScheme="red" leftIcon={<FaTrash />} mt={2} onClick={() => deleteComponent(index)}>
               Delete
             </Button>
