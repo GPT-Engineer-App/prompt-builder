@@ -258,26 +258,42 @@ const SavedPrompts = ({ prompts, onSelectPrompt }) => {
   const [apiResponse, setApiResponse] = useState("");
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const handleUsePrompt = async () => {
-    const response = await fetch("https://api.openai.com/v1/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "text-davinci-002",
-        prompt: `${selectedPrompt}\n\n${userMessage}`,
-        max_tokens: 100,
-        n: 1,
-        stop: null,
-        temperature: 0.7,
-      }),
-    });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-    const data = await response.json();
-    setApiResponse(data.choices[0].text);
-    onClose();
+  const handleUsePrompt = async () => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("https://api.openai.com/v1/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "text-davinci-002",
+          prompt: `${selectedPrompt}\n\n${userMessage}`,
+          max_tokens: 100,
+          n: 1,
+          stop: null,
+          temperature: 0.7,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Invalid API key. Please try again.");
+      }
+
+      const data = await response.json();
+      setApiResponse(data.choices[0].text);
+      onClose();
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -313,9 +329,10 @@ const SavedPrompts = ({ prompts, onSelectPrompt }) => {
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleUsePrompt}>
+            <Button colorScheme="blue" mr={3} onClick={handleUsePrompt} isLoading={isLoading}>
               Send
             </Button>
+            {error && <Text color="red.500">{error}</Text>}
             <Button variant="ghost" onClick={onClose}>
               Cancel
             </Button>
