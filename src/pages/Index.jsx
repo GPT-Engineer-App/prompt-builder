@@ -79,10 +79,12 @@ const Index = () => {
     });
   };
 
-  const [generatedMessage, setGeneratedMessage] = useState("");
+  const [generatedSystemPrompt, setGeneratedSystemPrompt] = useState("");
+  const [systemPromptName, setSystemPromptName] = useState("");
+  const [savedSystemPrompts, setSavedSystemPrompts] = useState([]);
 
-  const generateMessage = () => {
-    const message = components
+  const generateSystemPrompt = () => {
+    const systemPrompt = components
       .map(({ content }) => {
         let personalizedContent = content;
 
@@ -104,7 +106,7 @@ const Index = () => {
       })
       .join("\n\n");
 
-    setGeneratedMessage(message);
+    setGeneratedSystemPrompt(systemPrompt);
   };
 
   useEffect(() => {
@@ -205,16 +207,48 @@ const Index = () => {
         ))}
       </VStack>
 
-      <Button colorScheme="blue" size="lg" mt={8} onClick={generateMessage}>
-        Generate Message
+      <Button colorScheme="blue" size="lg" mt={8} onClick={generateSystemPrompt}>
+        Generate System Prompt
       </Button>
 
-      {generatedMessage && (
-        <Box mt={8} p={4} borderWidth={1} borderRadius="md">
+      {generatedSystemPrompt && (
+        <Box mt={8}>
           <Heading size="md" mb={4}>
-            Generated Message:
+            Generated System Prompt:
           </Heading>
-          <Text whiteSpace="pre-wrap">{generatedMessage}</Text>
+          <Text whiteSpace="pre-wrap">{generatedSystemPrompt}</Text>
+
+          <Input value={systemPromptName} onChange={(e) => setSystemPromptName(e.target.value)} placeholder="Enter a name for the system prompt" mt={4} />
+          <Button
+            colorScheme="blue"
+            mt={2}
+            onClick={() => {
+              setSavedSystemPrompts([...savedSystemPrompts, { name: systemPromptName, prompt: generatedSystemPrompt }]);
+              setSystemPromptName("");
+            }}
+          >
+            Save System Prompt
+          </Button>
+
+          <Heading size="md" mt={8} mb={4}>
+            Saved System Prompts:
+          </Heading>
+          {savedSystemPrompts.map(({ name, prompt }, index) => (
+            <Box key={index} borderWidth={1} borderRadius="md" p={4} mt={4}>
+              <Heading size="sm">{name}</Heading>
+              <Text mt={2}>{prompt}</Text>
+              <Button
+                colorScheme="blue"
+                size="sm"
+                mt={2}
+                onClick={() => {
+                  alert(`Sending prompt to OpenAI API:\n\n${prompt}`);
+                }}
+              >
+                Try in OpenAI
+              </Button>
+            </Box>
+          ))}
         </Box>
       )}
     </Box>
