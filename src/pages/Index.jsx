@@ -60,13 +60,29 @@ const Index = () => {
     setGeneratedMessage("");
   }, [components, persona]);
 
+  const handleDragStart = (e, index) => {
+    e.dataTransfer.setData("text/plain", index);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e, targetIndex) => {
+    const sourceIndex = parseInt(e.dataTransfer.getData("text"), 10);
+    const newComponents = [...components];
+    const [removed] = newComponents.splice(sourceIndex, 1);
+    newComponents.splice(targetIndex, 0, removed);
+    setComponents(newComponents);
+  };
+
   return (
     <Box maxW="800px" mx="auto" p={8}>
       <Heading mb={8}>LinkedIn Cold Outreach Message Builder</Heading>
 
       <VStack spacing={4} align="stretch">
         {components.map(({ type, content }, index) => (
-          <Box key={index} p={4} borderWidth={1} borderRadius="md">
+          <Box key={index} p={4} borderWidth={1} borderRadius="md" draggable="true" onDragStart={(e) => handleDragStart(e, index)} onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, index)}>
             <Text fontWeight="bold" mb={2}>
               {type === COMPONENT_TYPES.TEXT ? "Text Block" : "Personalized Block"}
             </Text>
