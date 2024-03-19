@@ -310,7 +310,11 @@ const SavedPrompts = ({ prompts, onSelectPrompt }) => {
       </Heading>
       {prompts.map((prompt, index) => (
         <Box key={index} mb={2}>
-          <Text>{prompt}</Text>
+          {prompt.split("\n").map((paragraph, i) => (
+            <Text key={i} mb={2}>
+              {paragraph}
+            </Text>
+          ))}
           <Button
             size="sm"
             colorScheme="blue"
