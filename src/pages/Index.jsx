@@ -249,7 +249,37 @@ const Index = () => {
   );
 };
 
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, useDisclosure } from "@chakra-ui/react";
+
 const SavedPrompts = ({ prompts, onSelectPrompt }) => {
+  const [selectedPrompt, setSelectedPrompt] = useState("");
+  const [apiKey, setApiKey] = useState("");
+  const [userMessage, setUserMessage] = useState("");
+  const [apiResponse, setApiResponse] = useState("");
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const handleUsePrompt = async () => {
+    const response = await fetch("https://api.openai.com/v1/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "text-davinci-002",
+        prompt: `${selectedPrompt}\n\n${userMessage}`,
+        max_tokens: 100,
+        n: 1,
+        stop: null,
+        temperature: 0.7,
+      }),
+    });
+
+    const data = await response.json();
+    setApiResponse(data.choices[0].text);
+    onClose();
+  };
+
   return (
     <Box mt={8}>
       <Heading size="md" mb={4}>
@@ -258,11 +288,49 @@ const SavedPrompts = ({ prompts, onSelectPrompt }) => {
       {prompts.map((prompt, index) => (
         <Box key={index} mb={2}>
           <Text>{prompt}</Text>
-          <Button size="sm" colorScheme="blue" mt={2} onClick={() => onSelectPrompt(prompt)}>
+          <Button
+            size="sm"
+            colorScheme="blue"
+            mt={2}
+            onClick={() => {
+              setSelectedPrompt(prompt);
+              onOpen();
+            }}
+          >
             Use Prompt
           </Button>
         </Box>
       ))}
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Use Prompt</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Input value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="Enter OpenAI API Key" mb={4} />
+            <Textarea value={userMessage} onChange={(e) => setUserMessage(e.target.value)} placeholder="Enter your message" />
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={handleUsePrompt}>
+              Send
+            </Button>
+            <Button variant="ghost" onClick={onClose}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {apiResponse && (
+        <Box mt={4} p={4} borderWidth={1} borderRadius="md">
+          <Heading size="md" mb={2}>
+            API Response:
+          </Heading>
+          <Text>{apiResponse}</Text>
+        </Box>
+      )}
     </Box>
   );
 };
