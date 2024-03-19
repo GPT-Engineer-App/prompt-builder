@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Box, VStack, Text, Textarea, Button, Select, Input, Heading, Divider } from "@chakra-ui/react";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
@@ -17,6 +17,7 @@ const PersonalizedOptions = {
 
 const Index = () => {
   const [components, setComponents] = useState([]);
+  const [savedComponents, setSavedComponents] = useState([]);
   const [persona, setPersona] = useState({
     name: "",
     company: "",
@@ -32,9 +33,19 @@ const Index = () => {
     customVariables: [{ name: "Custom Variable", value: "" }],
   });
 
-  const addComponent = (type) => {
-    setComponents([...components, { type, content: "" }]);
-  };
+  const addComponent = useCallback(
+    (type) => {
+      if (type.startsWith("saved:")) {
+        const savedComponent = savedComponents.find((c) => c.name === type.slice(6));
+        if (savedComponent) {
+          setComponents([...components, { ...savedComponent }]);
+        }
+      } else {
+        setComponents([...components, { type, content: "", name: "" }]);
+      }
+    },
+    [components, savedComponents],
+  );
 
   const updateComponent = (index, content) => {
     const updatedComponents = [...components];
@@ -116,18 +127,27 @@ const Index = () => {
     setComponents(newComponents);
   };
 
+  const saveComponent = (index) => {
+    const component = components[index];
+    setSavedComponents([...savedComponents, component]);
+  };
+
   return (
     <Box maxW="800px" mx="auto" p={8}>
       <Heading mb={8}>LinkedIn Cold Outreach Message Builder</Heading>
 
       <VStack spacing={4} align="stretch">
-        {components.map(({ type, content }, index) => (
+        {components.map(({ type, content, name }, index) => (
           <Box key={index} p={4} borderWidth={1} borderRadius="md" draggable="true" onDragStart={(e) => handleDragStart(e, index)} onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, index)}>
+            <Input value={name} onChange={(e) => updateComponent(index, "name", e.target.value)} placeholder="Enter block name" mb={2} />
             <Text fontWeight="bold" mb={2}>
               {type === COMPONENT_TYPES.TEXT ? "Text Block" : "Personalized Block"}
             </Text>
-            <Textarea value={content} onChange={(e) => updateComponent(index, e.target.value)} placeholder="Enter your text here. Use {{jobTitle}}, {{company}}, {{name}}, {{industry}}, {{userName}}, {{userTitle}}, {{userCompany}}, and custom variables as placeholders." />
-            <Button size="sm" colorScheme="red" leftIcon={<FaTrash />} mt={2} onClick={() => deleteComponent(index)}>
+            <Textarea value={content} onChange={(e) => updateComponent(index, "content", e.target.value)} placeholder="Enter your text here. Use {{jobTitle}}, {{company}}, {{name}}, {{industry}}, {{userName}}, {{userTitle}}, {{userCompany}}, and custom variables as placeholders." />
+            <Button size="sm" colorScheme="blue" mt={2} onClick={() => saveComponent(index)}>
+              Save
+            </Button>
+            <Button size="sm" colorScheme="red" leftIcon={<FaTrash />} mt={2} ml={2} onClick={() => deleteComponent(index)}>
               Delete
             </Button>
           </Box>
@@ -138,6 +158,11 @@ const Index = () => {
         <Select placeholder="Add a component" onChange={(e) => addComponent(e.target.value)}>
           <option value={COMPONENT_TYPES.TEXT}>Text Block</option>
           <option value={COMPONENT_TYPES.PERSONALIZED}>Personalized Block</option>
+          {savedComponents.map((component, index) => (
+            <option key={index} value={`saved:${component.name}`}>
+              {component.name}
+            </option>
+          ))}
         </Select>
       </Box>
 
