@@ -326,9 +326,9 @@ const SavedPrompts = ({ prompts, onSelectPrompt }) => {
         </Box>
       ))}
 
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={onClose} size="xl">
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent maxH="80vh">
           <ModalHeader>Use Prompt</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
@@ -349,11 +349,11 @@ const SavedPrompts = ({ prompts, onSelectPrompt }) => {
       </Modal>
 
       {apiResponse && (
-        <Box mt={4} p={4} borderWidth={1} borderRadius="md">
+        <Box mt={4} p={4} borderWidth={1} borderRadius="md" maxH="40vh" overflowY="auto">
           <Heading size="md" mb={2}>
             API Response:
           </Heading>
-          <Text>{apiResponse}</Text>
+          <Text whiteSpace="pre-wrap">{apiResponse}</Text>
         </Box>
       )}
     </Box>
