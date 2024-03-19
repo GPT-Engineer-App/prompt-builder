@@ -73,7 +73,17 @@ const Index = () => {
   const generateMessage = () => {
     const message = components
       .map(({ content }) => {
-        let personalizedContent = content.replace("{{name}}", persona.name).replace("{{company}}", persona.company).replace("{{highlightedEducation}}", persona.highlightedEducation).replace("{{jobTitle}}", persona.jobTitle).replace("{{industry}}", persona.industry).replace("{{userName}}", user.name).replace("{{userTitle}}", user.title).replace("{{userCompany}}", user.company);
+        let personalizedContent = content;
+
+        Object.entries(persona).forEach(([key, value]) => {
+          personalizedContent = personalizedContent.replace(new RegExp(`{{${key}}}`, "g"), value);
+        });
+
+        Object.entries(user).forEach(([key, value]) => {
+          if (key !== "customVariables") {
+            personalizedContent = personalizedContent.replace(new RegExp(`{{user${key.charAt(0).toUpperCase() + key.slice(1)}}}`, "g"), value);
+          }
+        });
 
         user.customVariables.forEach(({ name, value }) => {
           personalizedContent = personalizedContent.replace(`{{${name}}}`, value);
