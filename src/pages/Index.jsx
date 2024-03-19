@@ -266,38 +266,28 @@ const SavedPrompts = ({ prompts, onSelectPrompt }) => {
     setError("");
 
     try {
-      try {
-        const response = await fetch("https://api.openai.com/v1/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
-          },
-          body: JSON.stringify({
-            model: "text-davinci-002",
-            prompt: `${selectedPrompt}\n\n${userMessage}`,
-            max_tokens: 100,
-            n: 1,
-            stop: null,
-            temperature: 0.7,
-          }),
-        });
+      const response = await fetch("https://api.openai.com/v1/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "text-davinci-002",
+          prompt: `${selectedPrompt}\n\n${userMessage}`,
+          max_tokens: 100,
+          n: 1,
+          stop: null,
+          temperature: 0.7,
+        }),
+      });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("API request failed:", response.status, errorData);
-          throw new Error("API request failed. Please check your API key and try again.");
-        }
-
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(`API request failed with status ${response.status}: ${errorData.error.message}`);
+      } else {
         const data = await response.json();
-        console.log("API response:", data);
         setApiResponse(data.choices[0].text);
-        onClose();
-      } catch (error) {
-        console.error("Error:", error);
-        setError(error.message);
-      } finally {
-        setIsLoading(false);
       }
     } catch (error) {
       setError(error.message);
